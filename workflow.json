@@ -1,0 +1,289 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "feedback",
+        "options": {}
+      },
+      "id": "99d0188b-0e4f-4f4a-9a2f-790323425fa1",
+      "name": "Recibir Feedback",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        304
+      ],
+      "webhookId": "7034d4a8-9176-4473-8bf5-9db146d61001"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.sentimiento }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "negativo",
+              "id": "c64890a3-273c-4d94-9b5e-3e87689a435c"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "192f6e51-92a7-4f0a-8233-32694f3098ce",
+      "name": "Es Negativo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "mensaje",
+              "value": "Feedback positivo - no requiere acción",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e9cd60e3-d6f4-45ea-9ab9-4607c313cfad",
+      "name": "Descartar Positivo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1264,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1dY30JVG-VE7QDkT4hWjDC8Bb6S9-B7Q21GfXlAtvsYE",
+          "mode": "list",
+          "cachedResultName": "n8n prueba",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dY30JVG-VE7QDkT4hWjDC8Bb6S9-B7Q21GfXlAtvsYE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dY30JVG-VE7QDkT4hWjDC8Bb6S9-B7Q21GfXlAtvsYE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mensaje": "={{ $json.mensaje_original }}",
+            "sentimiento": "={{ $json.sentimiento }}",
+            "fecha": "={{ $now.toFormat(\"yyyy-MM-dd HH:mm:ss\") }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sentimiento",
+              "displayName": "sentimiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c6bf966b-4183-412d-bb1b-95eae79e33e1",
+      "name": "Guardar Feedback Negativo",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1264,
+        208
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qZHu0zeSCROEcGcu",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "sentimiento",
+              "value": "={{ $json.output.toLowerCase().trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "mensaje_original",
+              "value": "={{ $(\"Recibir Feedback\").item.json.body.mensaje }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "59b21695-32ea-4b34-a6d6-42fcbc60cd17",
+      "name": "Extraer Sentimiento",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analiza el siguiente mensaje y responde solo con una palabra: \"positivo\" o \"negativo\".\n\nMensaje: {{ $json.body.mensaje }}",
+        "options": {}
+      },
+      "id": "ec612c9b-9b7d-4e5d-8fcb-6e7d9b7cbff4",
+      "name": "Clasificar Sentimiento",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "model": "moonshotai/kimi-k2-instruct-0905",
+        "options": {
+          "maxTokensToSample": 100,
+          "temperature": 0.1
+        }
+      },
+      "id": "e01e54df-95e4-4aff-b288-bd0f16fd9e6d",
+      "name": "Groq Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        536,
+        528
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "IqfNnqhVSUwY0XcO",
+          "name": "Groq account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Feedback": {
+      "main": [
+        [
+          {
+            "node": "Clasificar Sentimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Negativo?": {
+      "main": [
+        [
+          {
+            "node": "Guardar Feedback Negativo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Descartar Positivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer Sentimiento": {
+      "main": [
+        [
+          {
+            "node": "Es Negativo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificar Sentimiento": {
+      "main": [
+        [
+          {
+            "node": "Extraer Sentimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Clasificar Sentimiento",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ff81980d6314accb5fdfe9a1467d5040b3851801e87ca4ef6a128c2e52c88957"
+  }
+}
